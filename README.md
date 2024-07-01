@@ -13,3 +13,4 @@ This app helps you find goods and services within your community or in other com
 5. Natural language search using LLM RAG
 6. Threads for community engagement
 
+ 
