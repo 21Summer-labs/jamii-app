@@ -1,75 +1,64 @@
 import 'package:flutter/material.dart';
-import '../widgets/styled_widgets.dart';
-import '../../controllers/product_controller.dart';
-import '../../models/product_model.dart';
-import 'package:provider/provider.dart';
+import '../models/product_model.dart';
+import '../controllers/product_controller.dart';
+import '../widgets/product_overview_card.dart';
 
-class SearchProductScreen extends StatefulWidget {
+class SearchPage extends StatefulWidget {
   @override
-  _SearchProductScreenState createState() => _SearchProductScreenState();
+  _SearchPageState createState() => _SearchPageState();
 }
 
-class _SearchProductScreenState extends State<SearchProductScreen> {
-  final TextEditingController _searchController = TextEditingController();
+class _SearchPageState extends State<SearchPage> {
+  final ProductController _productController = ProductController();
   List<ProductModel> _searchResults = [];
+  String _searchQuery = '';
+
+  void _performSearch(String query) {
+    setState(() {
+      _searchQuery = query;
+    });
+    // In a real app, you'd implement a more sophisticated search mechanism
+    _productController.getAllProducts().first.then((products) {
+      setState(() {
+        _searchResults = products.where((product) =>
+          product.name.toLowerCase().contains(query.toLowerCase()) ||
+          product.description.toLowerCase().contains(query.toLowerCase())
+        ).toList();
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    final productController = Provider.of<ProductController>(context);
-
     return Scaffold(
       appBar: AppBar(
-        title: Heading4Text('Search Products', uppercase: true),
-      ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Search for products...',
-                suffixIcon: IconButton(
-                  icon: Icon(Icons.search),
-                  onPressed: () {
-                    // Implement search functionality
-                    // For now, we'll just get all products
-                    setState(() {
-                      _searchResults = [];
-                    });
-                  },
-                ),
-              ),
-            ),
+        title: TextField(
+          decoration: InputDecoration(
+            hintText: 'Search products...',
+            border: InputBorder.none,
           ),
-          Expanded(
-            child: StreamBuilder<List<ProductModel>>(
-              stream: productController.getAllProducts(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
-                }
-                if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return Center(child: Paragraph1Text('No products found'));
-                }
-                return ListView.builder(
-                  itemCount: snapshot.data!.length,
-                  itemBuilder: (context, index) {
-                    final product = snapshot.data![index];
-                    return ListTile(
-                      title: Heading4Text(product.name),
-                      subtitle: Paragraph2Text('\$${product.price.toStringAsFixed(2)}'),
-                      onTap: () {
-                        Navigator.pushNamed(context, '/product_details', arguments: product.id);
-                      },
+          onChanged: _performSearch,
+        ),
+      ),
+      body: _searchQuery.isEmpty
+          ? Center(child: Text('Start searching for products'))
+          : ListView.builder(
+              itemCount: _searchResults.length,
+              itemBuilder: (context, index) {
+                return ProductOverviewCard(
+                  product: _searchResults[index],
+                  onTap: () {
+                    // Navigate to product details page
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ProductPage(product: _searchResults[index]),
+                      ),
                     );
                   },
                 );
               },
             ),
-          ),
-        ],
-      ),
     );
   }
 }
