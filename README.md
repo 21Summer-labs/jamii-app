@@ -1,16 +1,15 @@
-# jamii_v02
+# jamii_APP
 
-A new Flutter project.
+A location based social commerce platform
 
-## Getting Started
+This app helps you find goods and services within your community or in other communities
 
-This project is a starting point for a Flutter application.
 
-A few resources to get you started if this is your first Flutter project:
+## Roadmap
+1. User management ✓
+2. store and product management
+3. Location identification using gps
+4. Google maps for finding product/store location
+5. Natural language search using LLM RAG
+6. Threads for community engagement
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
