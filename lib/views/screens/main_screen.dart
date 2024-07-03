@@ -16,6 +16,7 @@ import 'search_screen.dart';
 import 'admin_dashboard.dart';
 import 'create_store_screen.dart';
 import 'create_product_screen.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class MainScreen extends StatelessWidget {
   @override
@@ -104,7 +105,16 @@ class UserDetailsSection extends StatelessWidget {
   }
 }
 
-class StoreDetailsSection extends StatelessWidget {
+
+
+class StoreDetailsSection extends StatefulWidget {
+  @override
+  _StoreDetailsSectionState createState() => _StoreDetailsSectionState();
+}
+
+class _StoreDetailsSectionState extends State<StoreDetailsSection> {
+  bool _showMap = true;
+
   @override
   Widget build(BuildContext context) {
     final userController = Provider.of<UserController>(context);
@@ -194,6 +204,55 @@ class StoreDetailsSection extends StatelessWidget {
                   )
                 else
                   Text('No store image available'),
+                SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () => _showEditStoreModal(context, userStore),
+                      child: Text('Edit Store'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () => _showDeleteConfirmation(context, userStore.id),
+                      child: Text('Delete Store'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        foregroundColor: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Store Location', style: Theme.of(context).textTheme.titleMedium),
+                    IconButton(
+                      icon: Icon(_showMap ? Icons.visibility_off : Icons.visibility),
+                      onPressed: () {
+                        setState(() {
+                          _showMap = !_showMap;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+                if (_showMap)
+                  Container(
+                    height: 200,
+                    child: GoogleMap(
+                      initialCameraPosition: CameraPosition(
+                        target: LatLng(userStore.location.latitude, userStore.location.longitude),
+                        zoom: 15,
+                      ),
+                      markers: {
+                        Marker(
+                          markerId: MarkerId('store_location'),
+                          position: LatLng(userStore.location.latitude, userStore.location.longitude),
+                        ),
+                      },
+                    ),
+                  ),
               ],
             ),
           ),
@@ -201,7 +260,108 @@ class StoreDetailsSection extends StatelessWidget {
       },
     );
   }
+
+  void _showEditStoreModal(BuildContext context, StoreModel store) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (BuildContext context) {
+        return EditStoreForm(store: store);
+      },
+    );
+  }
+
+  void _showDeleteConfirmation(BuildContext context, String storeId) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Delete Store'),
+          content: Text('Are you sure you want to delete this store? This action cannot be undone.'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Delete'),
+              onPressed: () {
+                // Call the delete method from your StoreController
+                Provider.of<StoreController>(context, listen: false).deleteStore(storeId);
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 }
+
+class EditStoreForm extends StatefulWidget {
+  final StoreModel store;
+
+  EditStoreForm({required this.store});
+
+  @override
+  _EditStoreFormState createState() => _EditStoreFormState();
+}
+
+class _EditStoreFormState extends State<EditStoreForm> {
+  late TextEditingController _phoneController;
+  // Add more controllers for other fields
+
+  @override
+  void initState() {
+    super.initState();
+    _phoneController = TextEditingController(text: widget.store.phoneNumber);
+    // Initialize other controllers
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.all(16),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          TextField(
+            controller: _phoneController,
+            decoration: InputDecoration(labelText: 'Phone Number'),
+          ),
+          // Add more fields as needed
+          SizedBox(height: 16),
+          ElevatedButton(
+            child: Text('Save Changes'),
+            onPressed: () {
+              // Update the store with new information
+              final updatedStore = StoreModel(
+                id: widget.store.id,
+                ownerId: widget.store.ownerId,
+                phoneNumber: _phoneController.text,
+                availableHours: widget.store.availableHours,
+                storeFrontPhotoUrl: widget.store.storeFrontPhotoUrl,
+                location: widget.store.location,
+              );
+              Provider.of<StoreController>(context, listen: false).updateStore(updatedStore);
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _phoneController.dispose();
+    // Dispose other controllers
+    super.dispose();
+  }
+}
+
 class ProductCatalogueSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {

@@ -1,7 +1,8 @@
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:io';
-import 'dart:math' show sqrt;  
+import 'dart:math' show sqrt, max;
 import 'package:image_picker/image_picker.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import '../models/product_model.dart';
@@ -28,19 +29,15 @@ class ProductService {
 
   Future<String> createProduct(ProductModel product, dynamic imageFile, {dynamic audioFile}) async {
     try {
-      // Upload the product image
       String imageUrl = await _uploadFile(imageFile, 'product_images/${product.storeId}');
       
-      // Upload the audio file if provided
       String? audioUrl;
       if (audioFile != null) {
         audioUrl = await _uploadFile(audioFile, 'product_audio/${product.storeId}');
       }
       
-      // Generate embedding for the product description
       List<double> embedding = await generateEmbedding(product.description);
 
-      // Create a new document in Firestore
       DocumentReference docRef = await _firestore.collection('products').add({
         ...product.toMap(),
         'imageUrl': imageUrl,
@@ -102,34 +99,43 @@ class ProductService {
     });
   }
 
-  Future<List<ProductModel>> searchProductsByVector(String query, {int limit = 5}) async {
+  Future<List<ProductModel>> searchProductsByVector(String query, {int limit = 5, double threshold = 0.75}) async {
     try {
-      // Generate embedding for the search query
       List<double> queryEmbedding = await generateEmbedding(query);
-
-      // Fetch all products
       QuerySnapshot querySnapshot = await _firestore.collection('products').get();
 
-      // Calculate cosine similarity and sort products
       List<ProductModel> allProducts = querySnapshot.docs
           .map((doc) => ProductModel.fromMap(doc.data() as Map<String, dynamic>, doc.id))
           .toList();
 
-      allProducts.sort((a, b) {
-        double similarityA = cosineSimilarity(queryEmbedding, a.embedding ?? []);
-        double similarityB = cosineSimilarity(queryEmbedding, b.embedding ?? []);
-        return similarityB.compareTo(similarityA);
-      });
+      List<Future<MapEntry<ProductModel, double>>> similarityFutures = allProducts.map((product) async {
+        List<double> nameEmbedding = await generateEmbedding(product.name);
+        List<double> descriptionEmbedding = await generateEmbedding(product.description);
 
-      // Return top 'limit' results
-      return allProducts.take(limit).toList();
+        double nameSimilarity = cosineSimilarity(queryEmbedding, nameEmbedding);
+        double descriptionSimilarity = cosineSimilarity(queryEmbedding, descriptionEmbedding);
+
+        double maxSimilarity = max(nameSimilarity, descriptionSimilarity);
+        return MapEntry(product, maxSimilarity);
+      }).toList();
+
+      List<MapEntry<ProductModel, double>> similarities = await Future.wait(similarityFutures);
+
+      similarities.sort((a, b) => b.value.compareTo(a.value));
+
+      List<ProductModel> results = similarities
+          .where((entry) => entry.value >= threshold)
+          .map((entry) => entry.key)
+          .take(limit)
+          .toList();
+
+      return results;
     } catch (e) {
       print('Error searching products: $e');
       rethrow;
     }
   }
 
-  
   double cosineSimilarity(List<double> a, List<double> b) {
     if (a.length != b.length) return 0;
     double dotProduct = 0;
@@ -148,7 +154,6 @@ class ProductService {
       late UploadTask uploadTask;
 
       if (kIsWeb) {
-        // Handle web
         if (file is XFile) {
           uploadTask = _storage.ref(path).putData(
             await file.readAsBytes(),
@@ -158,7 +163,6 @@ class ProductService {
           throw Exception('Unsupported file type for web');
         }
       } else {
-        // Handle mobile
         if (file is File) {
           uploadTask = _storage.ref(path).putFile(file);
         } else if (file is XFile) {
