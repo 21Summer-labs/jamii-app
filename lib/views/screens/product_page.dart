@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../models/product_model.dart';
-import '../controllers/store_controller.dart';
-import '../models/store_model.dart';
+import '../../models/product_model.dart';
+import '../../controllers/store_controller.dart';
+import '../../models/store_model.dart';
 
 class ProductPage extends StatefulWidget {
   final ProductModel product;
@@ -43,33 +43,33 @@ class _ProductPageState extends State<ProductPage> {
                 children: [
                   Text(
                     widget.product.name,
-                    style: Theme.of(context).textTheme.headline5,
+                    style: Theme.of(context).textTheme.headlineSmall,
                   ),
                   SizedBox(height: 8),
                   Text(
                     '\$${widget.product.price.toStringAsFixed(2)}',
-                    style: Theme.of(context).textTheme.headline6?.copyWith(
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       color: Theme.of(context).primaryColor,
                     ),
                   ),
                   SizedBox(height: 16),
                   Text(
                     'Description:',
-                    style: Theme.of(context).textTheme.subtitle1,
+                    style: Theme.of(context).textTheme.titleMedium,
                   ),
                   Text(widget.product.description),
                   if (widget.product.audioUrl != null) ...[
                     SizedBox(height: 16),
                     Text(
                       'Audio Description:',
-                      style: Theme.of(context).textTheme.subtitle1,
+                      style: Theme.of(context).textTheme.titleMedium,
                     ),
                     // Add an audio player widget here
                   ],
                   SizedBox(height: 24),
                   Text(
                     'Sold by:',
-                    style: Theme.of(context).textTheme.subtitle1,
+                    style: Theme.of(context).textTheme.titleMedium,
                   ),
                   FutureBuilder<StoreModel?>(
                     future: _storeFuture,

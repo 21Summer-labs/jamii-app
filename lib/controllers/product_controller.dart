@@ -1,13 +1,13 @@
-// lib/controllers/product_controller.dart
-
 import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../models/product_model.dart';
 import '../services/product_service.dart';
 
-class ProductController {
+class ProductController extends ChangeNotifier {
   final ProductService _productService = ProductService();
 
-  Future<String> createProduct(ProductModel product, File imageFile, {File? audioFile}) async {
+  Future<String> createProduct(ProductModel product, dynamic imageFile, {dynamic audioFile}) async {
     try {
       return await _productService.createProduct(product, imageFile, audioFile: audioFile);
     } catch (e) {

@@ -1,13 +1,14 @@
 // lib/controllers/store_controller.dart
 
 import 'dart:io';
+import 'package:flutter/material.dart';
 import '../models/store_model.dart';
 import '../services/store_service.dart';
 
-class StoreController {
+class StoreController extends ChangeNotifier {
   final StoreService _storeService = StoreService();
 
-  Future<String> createStore(StoreModel store, File storeFrontPhoto) async {
+  Future<String> createStore(StoreModel store, dynamic storeFrontPhoto) async {
     try {
       return await _storeService.createStore(store, storeFrontPhoto);
     } catch (e) {

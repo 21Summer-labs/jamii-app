@@ -3,14 +3,18 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 import '../models/product_model.dart';
+import 'package:flutter/foundation.dart'
+    show kIsWeb;
 
+  
 class ProductService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseStorage _storage = FirebaseStorage.instance;
 
   // Create a new product
-  Future<String> createProduct(ProductModel product, File imageFile, {File? audioFile}) async {
+  Future<String> createProduct(ProductModel product, dynamic imageFile, {dynamic audioFile}) async {
     try {
       // Upload the product image
       String imageUrl = await _uploadFile(imageFile, 'product_images/${product.storeId}');
@@ -30,10 +34,11 @@ class ProductService {
       
       return docRef.id;
     } catch (e) {
-      print(e.toString());
+      print('Error creating product: $e');
       rethrow;
     }
   }
+
 
   // Get a product by ID
   Future<ProductModel?> getProduct(String productId) async {
@@ -88,12 +93,35 @@ class ProductService {
   }
 
   // Helper method to upload files to Firebase Storage
-  Future<String> _uploadFile(File file, String path) async {
+  Future<String> _uploadFile(dynamic file, String path) async {
     try {
-      TaskSnapshot snapshot = await _storage.ref(path).putFile(file);
+      late UploadTask uploadTask;
+
+      if (kIsWeb) {
+        // Handle web
+        if (file is XFile) {
+          uploadTask = _storage.ref(path).putData(
+            await file.readAsBytes(),
+            SettableMetadata(contentType: 'image/jpeg'),
+          );
+        } else {
+          throw Exception('Unsupported file type for web');
+        }
+      } else {
+        // Handle mobile
+        if (file is File) {
+          uploadTask = _storage.ref(path).putFile(file);
+        } else if (file is XFile) {
+          uploadTask = _storage.ref(path).putFile(File(file.path));
+        } else {
+          throw Exception('Unsupported file type for mobile');
+        }
+      }
+
+      TaskSnapshot snapshot = await uploadTask;
       return await snapshot.ref.getDownloadURL();
     } catch (e) {
-      print(e.toString());
+      print('Error uploading file: $e');
       rethrow;
     }
   }

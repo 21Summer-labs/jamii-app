@@ -1,5 +1,3 @@
-// lib/services/auth_service.dart
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/user_model.dart';
@@ -77,6 +75,36 @@ class AuthService {
       await _firestore.collection('users').doc(user.uid).update({
         'name': name,
       });
+    }
+  }
+
+  // Get all users
+  Stream<List<UserModel>> getAllUsers() {
+    return _firestore.collection('users').snapshots().map((snapshot) {
+      return snapshot.docs.map((doc) {
+        return UserModel(
+          id: doc.id,
+          name: doc['name'],
+          email: doc['email'],
+        );
+      }).toList();
+    });
+  }
+
+  // Delete user
+  Future<void> deleteUser(String userId) async {
+    try {
+      // Delete user from Firebase Auth
+      User? user = _auth.currentUser;
+      if (user != null && user.uid == userId) {
+        await user.delete();
+      }
+      
+      // Delete user from Firestore
+      await _firestore.collection('users').doc(userId).delete();
+    } catch (e) {
+      print(e.toString());
+      throw Exception('Error deleting user');
     }
   }
 }

@@ -1,13 +1,12 @@
-// lib/models/store_model.dart
-
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 
 class StoreModel {
   final String id;
   final String ownerId;
   final String phoneNumber;
   final String storeFrontPhotoUrl;
-  final Map<String, dynamic> availableHours;
+  final List<Map<String, dynamic>> availableHours;
   final GeoPoint location;
 
   StoreModel({
@@ -25,7 +24,7 @@ class StoreModel {
       ownerId: map['ownerId'] ?? '',
       phoneNumber: map['phoneNumber'] ?? '',
       storeFrontPhotoUrl: map['storeFrontPhotoUrl'] ?? '',
-      availableHours: Map<String, dynamic>.from(map['availableHours'] ?? {}),
+      availableHours: List<Map<String, dynamic>>.from(map['availableHours'] ?? []),
       location: map['location'] ?? const GeoPoint(0, 0),
     );
   }

@@ -1,58 +1,42 @@
+// lib/views/screens/product_details_screen.dart
+
 import 'package:flutter/material.dart';
-import '../widgets/styled_widgets.dart';
-import '../../controllers/product_controller.dart';
 import '../../models/product_model.dart';
-import 'package:provider/provider.dart';
 
 class ProductDetailsScreen extends StatelessWidget {
-  final String productId;
+  final ProductModel product;
 
-  ProductDetailsScreen({required this.productId});
+  ProductDetailsScreen({required this.product});
 
   @override
   Widget build(BuildContext context) {
-    final productController = Provider.of<ProductController>(context);
-
     return Scaffold(
-      appBar: AppBar(
-        title: Heading4Text('Product Details', uppercase: true),
-      ),
-      body: FutureBuilder<ProductModel?>(
-        future: productController.getProduct(productId),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          }
-          if (!snapshot.hasData) {
-            return Center(child: Paragraph1Text('Product not found'));
-          }
-          final product = snapshot.data!;
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Image.network(product.imageUrl, height: 200, width: double.infinity, fit: BoxFit.cover),
+      appBar: AppBar(title: Text(product.name)),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Image.network(product.imageUrl),
+              SizedBox(height: 16),
+              Text(product.name, style: Theme.of(context).textTheme.headlineSmall),
+              SizedBox(height: 8),
+              Text('\$${product.price.toStringAsFixed(2)}', style: Theme.of(context).textTheme.titleLarge),
+              SizedBox(height: 16),
+              Text(product.description),
+              if (product.audioUrl != null) ...[
                 SizedBox(height: 16),
-                Heading2Text(product.name),
-                SizedBox(height: 8),
-                Heading3Text('\$${product.price.toStringAsFixed(2)}'),
-                SizedBox(height: 16),
-                Paragraph1Text(product.description),
-                if (product.audioUrl != null) ...[
-                  SizedBox(height: 16),
-                  StyledButton(
-                    text: 'Play Audio Description',
-                    onPressed: () {
-                      // Implement audio playback
-                      print('Play audio: ${product.audioUrl}');
-                    },
-                  ),
-                ],
+                ElevatedButton(
+                  onPressed: () {
+                    // Implement audio playback
+                  },
+                  child: Text('Play Audio Description'),
+                ),
               ],
-            ),
-          );
-        },
+            ],
+          ),
+        ),
       ),
     );
   }

@@ -3,6 +3,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import '../models/store_model.dart';
 
 class StoreService {
@@ -10,7 +11,7 @@ class StoreService {
   final FirebaseStorage _storage = FirebaseStorage.instance;
 
   // Create a new store
-  Future<String> createStore(StoreModel store, File storeFrontPhoto) async {
+  Future<String> createStore(StoreModel store, dynamic storeFrontPhoto) async {
     try {
       // Upload the store front photo
       String photoUrl = await _uploadFile(storeFrontPhoto, 'store_photos/${store.ownerId}');
@@ -70,10 +71,20 @@ class StoreService {
   }
 
   // Helper method to upload files to Firebase Storage
-  Future<String> _uploadFile(File file, String path) async {
+  Future<String> _uploadFile(dynamic file, String path) async {
     try {
-      TaskSnapshot snapshot = await _storage.ref(path).putFile(file);
-      return await snapshot.ref.getDownloadURL();
+      if (kIsWeb) {
+        // Handle web file upload
+        TaskSnapshot snapshot = await _storage.ref(path).putData(
+          await file.readAsBytes(),
+          SettableMetadata(contentType: 'image/jpeg'),
+        );
+        return await snapshot.ref.getDownloadURL();
+      } else {
+        // Handle mobile file upload
+        TaskSnapshot snapshot = await _storage.ref(path).putFile(file as File);
+        return await snapshot.ref.getDownloadURL();
+      }
     } catch (e) {
       print(e.toString());
       rethrow;
