@@ -1,5 +1,3 @@
-// lib/models/product_model.dart
-
 class ProductModel {
   final String id;
   final String storeId;
@@ -8,6 +6,7 @@ class ProductModel {
   final String description;
   final double price;
   final String? audioUrl;
+  final List<double>? embedding;
 
   ProductModel({
     required this.id,
@@ -17,6 +16,7 @@ class ProductModel {
     required this.description,
     required this.price,
     this.audioUrl,
+    this.embedding,
   });
 
   factory ProductModel.fromMap(Map<String, dynamic> map, String id) {
@@ -28,6 +28,7 @@ class ProductModel {
       description: map['description'] ?? '',
       price: (map['price'] ?? 0).toDouble(),
       audioUrl: map['audioUrl'],
+      embedding: map['embedding'] != null ? List<double>.from(map['embedding']) : null,
     );
   }
 
@@ -39,6 +40,7 @@ class ProductModel {
       'description': description,
       'price': price,
       'audioUrl': audioUrl,
+      'embedding': embedding,
     };
   }
 }

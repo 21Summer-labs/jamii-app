@@ -220,6 +220,7 @@ class _CreateStoreScreenState extends State<CreateStoreScreen> {
                   final userId = userController.getCurrentUserId();
                   if (userId != null) {
                     // Convert TimeOfDay to String before creating StoreModel
+                    // ignore: unused_local_variable
                     List<Map<String, dynamic>> formattedHours = _availableHours.map((hours) {
                       return {
                         'days': hours['days'],

@@ -1,0 +1,36 @@
+debug image loader ---+
+Add google maps
+add knn RAG
+add conversationa AI - chat with results
+discussions
+
+--
+
+Impement interfaces & loose coupling
+Implement asynchronous runtime: 
+Implement runtime modules: state and session management, schedulers and dispatchers, threads and processes, listeners and observers, handers and middleware
+optimize on avaialability, performance, modularity, interoperability, security, testability and usability
+
+--
+
+conduct market research
+
+\--
+
+gsutil cors set cors.json gs://fir-101-8b451.appspot.com
+[
+  {
+    "origin": ["*"],
+    "method": ["GET"],
+    "maxAgeSeconds": 3600
+  }
+]
+source ~/.zshrc   # For Zsh users
+# or
+source ~/.bashrc  # For Bash users
+export PATH=$PATH:/home/arch/google-cloud-sdk/bin
+nano ~/.zshrc   # For Zsh users
+# or
+nano ~/.bashrc  # For Bash users
+
+

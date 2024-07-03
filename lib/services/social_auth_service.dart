@@ -26,18 +26,20 @@ class SocialAuthService {
   }
 
   // Sign in with Facebook
-  Future<UserCredential?> signInWithFacebook() async {
-    try {
-      final LoginResult result = await FacebookAuth.instance.login();
-      if (result.status != LoginStatus.success) return null;
+  // Future<UserCredential?> signInWithFacebook() async {
+  //   try {
+  //     final LoginResult result = await FacebookAuth.instance.login();
+  //     if (result.status != LoginStatus.success) return null;
 
-      final OAuthCredential credential = FacebookAuthProvider.credential(result.accessToken!.token);
-      return await _auth.signInWithCredential(credential);
-    } catch (e) {
-      print('Error signing in with Facebook: $e');
-      return null;
-    }
-  }
+  //     // Use the correct property to get the access token
+  //     final AccessToken accessToken = result.accessToken!;
+  //     final OAuthCredential credential = FacebookAuthProvider.credential(accessToken.token);
+  //     return await _auth.signInWithCredential(credential);
+  //   } catch (e) {
+  //     print('Error signing in with Facebook: $e');
+  //     return null;
+  //   }
+  // }
 
   // Sign out
   Future<void> signOut() async {

@@ -1,6 +1,4 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import '../models/product_model.dart';
 import '../services/product_service.dart';
 
@@ -49,5 +47,14 @@ class ProductController extends ChangeNotifier {
 
   Stream<List<ProductModel>> getProductsByStoreId(String storeId) {
     return _productService.getProductsByStoreId(storeId);
+  }
+
+  Future<List<ProductModel>> searchProducts(String query) async {
+    try {
+      return await _productService.searchProductsByVector(query);
+    } catch (e) {
+      print('Error searching products: $e');
+      rethrow;
+    }
   }
 }
