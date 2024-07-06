@@ -1,5 +1,3 @@
-// lib/views/screens/main_screen.dart
-
 // ignore_for_file: unused_local_variable
 
 import 'package:flutter/material.dart';
@@ -12,7 +10,7 @@ import '../../controllers/product_controller.dart';
 import '../../models/user_model.dart';
 import '../../models/store_model.dart';
 import '../../models/product_model.dart';
-import 'search_screen.dart';
+import 'voice_search_screen.dart'; // Import the VoiceSearchScreen
 import 'admin_dashboard.dart';
 import 'create_store_screen.dart';
 import 'create_product_screen.dart';
@@ -71,7 +69,7 @@ class MainScreen extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => SearchScreen()),
+                  MaterialPageRoute(builder: (context) => VoiceSearchScreen()),
                 );
               },
             ),
@@ -81,6 +79,8 @@ class MainScreen extends StatelessWidget {
     );
   }
 }
+
+// ... Rest of the code remains the same
 
 class UserDetailsSection extends StatelessWidget {
   @override

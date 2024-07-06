@@ -25,6 +25,8 @@ dependencies:
   cached_network_image: ^3.2.0
   google_generative_ai: ^0.2.0
   google_maps_flutter: ^2.2.5
+  flutter_svg: ^2.0.5
+  speech_to_text: ^6.1.1
 
 dev_dependencies:
   flutter_test:
@@ -33,6 +35,9 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/voice_waves.svg
+
 
   # To add assets to your application, add an assets section, like this:
   # assets:
