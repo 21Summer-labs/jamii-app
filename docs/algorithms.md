@@ -268,3 +268,96 @@
    - Key waypoints
    - Navigation cues
 ```
+
+## 5. Chat Service
+
+
+
+### InitiateConversation(shopperId, storeId):
+
+```
+1. Validate participants:
+   - Verify shopper exists and is active
+   - Verify store exists and is active
+   - Get store owner ID from store
+
+2. Check existing conversations:
+   - Search for active conversation between participants
+   - Return existing conversation if found
+
+3. Create new conversation:
+   - Generate conversation ID
+   - Set initial status as ACTIVE
+   - Record creation timestamp
+   - Link to store context
+
+4. Set up conversation metadata:
+   - Initialize last message timestamp
+   - Set up read receipts tracking
+   - Configure notification preferences
+
+5. Publish ConversationStarted event
+
+6. Return conversation details
+```
+
+### SendMessage(conversationId, senderId, content):
+
+```
+1. Validate message:
+   - Check conversation exists and is active
+   - Verify sender is participant
+   - Validate content format and size
+   - Check for spam/inappropriate content
+
+2. Process message content:
+   - Sanitize text
+   - Process any media attachments
+   - Handle product references
+   - Generate preview if needed
+
+3. Create message:
+   - Generate message ID
+   - Set initial status as SENT
+   - Record timestamp
+   - Store content
+
+4. Update conversation:
+   - Update last message timestamp
+   - Update conversation status if needed
+
+5. Handle delivery:
+   - Queue for real-time delivery
+   - Set up retry mechanism
+   - Prepare notifications
+
+6. Publish MessageSent event
+
+7. Return message details
+```
+
+### GetConversationHistory(conversationId, pagination):
+
+```
+1. Validate request:
+   - Verify conversation exists
+   - Check user permissions
+   - Validate pagination parameters
+
+2. Fetch messages:
+   - Query message repository
+   - Apply pagination
+   - Include message metadata
+
+3. Enrich messages:
+   - Add sender details
+   - Include read status
+   - Add product details for product shares
+
+4. Update read status:
+   - Mark unread messages as read
+   - Record timestamp
+   - Publish MessageRead events
+
+5. Return paginated results
+```

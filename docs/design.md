@@ -41,6 +41,7 @@ This context handles store-related operations.
      - OwnerId (reference to User)
      - StoreName
      - Description
+     - Images (array of ImageData Value Object)
      - Location (Value Object)
      - BusinessHours (Value Object)
      - Category (Value Object)
@@ -134,32 +135,57 @@ This context handles shopping cart and order operations.
    - Behaviors:
      - CalculateSubtotal()
 
+
+### Communication
+
+#### Aggregates
+
+1. Conversation (Aggregate Root)
+   - Properties:
+     - ConversationId (Value Object)
+     - ShopperId (reference to User)
+     - StoreOwnerId (reference to User)
+     - StoreId (reference to Store)
+     - Status (Enum: ACTIVE, ARCHIVED, BLOCKED)
+     - CreatedAt
+     - LastMessageAt
+   - Behaviors:
+     - Create()
+     - Archive()
+     - Block()
+     - Unblock()
+     - UpdateLastMessageTime()
+
+2. Message (Entity)
+   - Properties:
+     - MessageId (Value Object)
+     - ConversationId (reference to Conversation)
+     - SenderId (reference to User)
+     - Content (Value Object)
+     - Status (Enum: SENT, DELIVERED, READ)
+     - Timestamp
+     - Type (Enum: TEXT, IMAGE, PRODUCT_SHARE)
+   - Behaviors:
+     - Send()
+     - MarkAsDelivered()
+     - MarkAsRead()
+
+3. MessageContent (Value Object)
+   - Properties:
+     - Text
+     - MediaUrl (optional)
+     - ProductReference (optional reference to Product)
+   - Behaviors:
+     - Validate()
+     - Sanitize()
+
 ## Domain Events
 
-1. StoreCreated
-   - StoreId
-   - OwnerId
-   - Timestamp
+Product searched
+Store viewed
+Product viewed
+Directions accessed
 
-2. ProductAdded
-   - ProductId
-   - StoreId
-   - Timestamp
-
-3. StoreVerified
-   - StoreId
-   - VerifierId
-   - Timestamp
-
-4. ProductOutOfStock
-   - ProductId
-   - StoreId
-   - Timestamp
-
-5. UserRegistered
-   - UserId
-   - UserType
-   - Timestamp
 
 ## Domain Services
 
@@ -180,3 +206,11 @@ This context handles shopping cart and order operations.
    - ValidateLocation(location)
    - CalculateDistance(location1, location2)
    - GetDirections(fromLocation, toLocation)
+
+5. ChatService
+   - InitiateConversation(shopperId, storeId)
+   - SendMessage(conversationId, senderId, content)
+   - GetConversationHistory(conversationId, pagination)
+   - GetActiveConversations(userId)
+   - SearchConversations(userId, query)
+
