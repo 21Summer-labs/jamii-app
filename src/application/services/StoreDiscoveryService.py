@@ -7,11 +7,18 @@ class StoreDiscoveryService:
             raise ValueError("Invalid location coordinates")
 
         # 2. Execute spatial query
+
+        # here we should get all stores and append them in a list based on the proximity
+        # return the first 10 (nearest)
         stores = self._find_stores_within_radius(location, radius)
 
         # 3. Apply filters
+        # I dont know why we need to apply filter for - we should get stores relevant to the product searched - ie the product is the filter
         filtered_stores = self._apply_store_filters(stores, filters)
 
+        # the rest of the methods seem irrelevant - 
+        # actually the second method seems more focused than this one
+        
         # 4. Enrich store data
         enriched_stores = self._enrich_store_data(filtered_stores)
 

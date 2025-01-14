@@ -1,0 +1,85 @@
+thus we have:
+	location service  - for tagging location of the store and getting user's location
+		- frontend gps
+
+	RAG service - for product search 
+		- cloud function [external service]
+
+	transcription service - for transcribing user audio input
+		external service
+
+	google maps service - more for the UI end of things [to guide the user to the store(s) location]
+		- frontend maps
+
+	LLM service - for tagging the products automatically based on user input
+		- external service
+
+	---
+
+	more over we require:
+		product management service
+		store management service
+		user management service
+
+
+---
+
+coding for external service is cumbersome, we could use normal http request
+	- gemini [for both completion and RAG]
+	- or another LLM and jinaai
+
+--
+
+
+presentation:
+
+	screens
+		product search page
+
+		---
+
+		store creation modal
+		product creation modal
+
+		---
+
+		store read page
+			store info
+			store products
+
+		product read page
+			product details
+
+	component
+		product overview
+		google maps
+		search component
+
+	----
+
+	UI/UX
+		the landing page is the search product page - which resembles google search to some extent with text, audio and image search available.
+
+		google maps is in the background in dark mode and the only location highlighted is the user's location (in red) and with a background overlay.
+
+		the search component is centered. When the user searches something (cant be empty), relevant results of products are got. The search section moves down - to resmeble a chat section and the results are displayed on top and an appropriate message for none if so.
+
+		the locations of the various products is highlighted on google maps, still in the background.
+
+		when a user selects a product, they are taken to the product read page, now the google map has its own section and only the user's and product's location is highlighted and directions provided. User can save product [for later viewing]. 
+
+		Store information is provided below.
+
+		User can also navigate to the store info. Where they'll find the store info which contains store details, their products and google maps directions. 
+
+
+	---
+
+		there is a button in the top right, which user can use to add their store. they provide store info (store create modal) and are navigated to their store page. They can add products using the create product button and create product modal (only in the store page). Products are displayed in the relevant store page.
+
+	---
+
+		delete functionality is imperative
+
+--
+

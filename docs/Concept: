@@ -17,6 +17,12 @@ Concept:
 
 	Our Jamii app helps shoppers who want to find products they want to buy by eliminating the difficulty of pinpointing local products and enabling easy discovery of exact items through location-based tagging of products and AI-assisted search using images and natural language.
 
+	Our online store helps store owners who want to go online by simplifying the process of uploading many products across different categories and increasing foot traffic to their store through AI-powered product uploads and location tagging for better visibility to nearby shoppers.
+
+	---
+
+	Shoppers:
+
 	job: looking for products they want to buy
 	pain: not easy to pinpoint local products
 	gains: they want to find the exact product easily
@@ -26,7 +32,7 @@ Concept:
 	gain creator: an AI assisted search using images and natural language
 
 
-	Our online store helps store owners who want to go online by simplifying the process of uploading many products across different categories and increasing foot traffic to their store through AI-powered product uploads and location tagging for better visibility to nearby shoppers.
+	Store Owners:
 
 	job: going online
 	pain: they have many products of differing categories
@@ -181,4 +187,7 @@ presentation
 	services
 
 
+----
+
+If a user doesnt find a product - its added as a request
 

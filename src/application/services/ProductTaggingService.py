@@ -9,3 +9,14 @@ class ProductTaggingService:
         # Placeholder for tag generation from a description
         return description.lower().split()
 
+# ---
+
+'''
+
+for the product tagging service, we should utilize computer vision.
+The store owner sends an image with an audio recording which acts as context for the image
+we transcript the audio recording - send the text with the image with a prompt to the LLM
+the LLM will return a json object of its description of the product which we will store
+we store the LLM output
+
+'''

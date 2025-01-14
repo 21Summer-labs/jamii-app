@@ -93,3 +93,12 @@ class ProductSearchService:
     def _attribute_based_search(self, tags, categories):
         return []
 
+'''
+---
+
+Since its not normal search, we use RAG
+User can appends image or text.
+We perform RAG on the inputs againsts our embedded store - and return the appropriate results in a chat like manner
+This reduces complexity overally
+
+''''

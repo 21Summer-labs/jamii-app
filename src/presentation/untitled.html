@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Nearby Cinemas</title>
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        #map {
+            height: 500px;
+            width: 100%;
+            border-radius: 8px;
+        }
+        .cinema-info {
+            padding: 10px;
+            max-width: 200px;
+            color: #333;
+        }
+        .controls {
+            margin-bottom: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        .toggle-button {
+            background-color: #333;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .toggle-button:hover {
+            background-color: #444;
+        }
+        .toggle-button.active {
+            background-color: #4285F4;
+        }
+    </style>
+</head>
+<body>
+    <h1>Nearby Cinemas</h1>
+    <div class="controls">
+        <button id="toggleLabels" class="toggle-button">Toggle Labels</button>
+    </div>
+    <div id="map"></div>
+
+    <script>
+        let map;
+        const darkMode = [
+            { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
+            { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
+            { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
+            {
+                featureType: "administrative.locality",
+                elementType: "labels.text.fill",
+                stylers: [{ color: "#d59563" }],
+            },
+            {
+                featureType: "poi",
+                elementType: "labels.text.fill",
+                stylers: [{ color: "#d59563" }],
+            },
+            {
+                featureType: "poi.park",
+                elementType: "geometry",
+                stylers: [{ color: "#263c3f" }],
+            },
+            {
+                featureType: "poi.park",
+                elementType: "labels.text.fill",
+                stylers: [{ color: "#6b9a76" }],
+            },
+            {
+                featureType: "road",
+                elementType: "geometry",
+                stylers: [{ color: "#38414e" }],
+            },
+            {
+                featureType: "road",
+                elementType: "geometry.stroke",
+                stylers: [{ color: "#212a37" }],
+            },
+            {
+                featureType: "road",
+                elementType: "labels.text.fill",
+                stylers: [{ color: "#9ca5b3" }],
+            },
+            {
+                featureType: "road.highway",
+                elementType: "geometry",
+                stylers: [{ color: "#746855" }],
+            },
+            {
+                featureType: "road.highway",
+                elementType: "geometry.stroke",
+                stylers: [{ color: "#1f2835" }],
+            },
+            {
+                featureType: "road.highway",
+                elementType: "labels.text.fill",
+                stylers: [{ color: "#f3d19c" }],
+            },
+            {
+                featureType: "transit",
+                elementType: "geometry",
+                stylers: [{ color: "#2f3948" }],
+            },
+            {
+                featureType: "transit.station",
+                elementType: "labels.text.fill",
+                stylers: [{ color: "#d59563" }],
+            },
+            {
+                featureType: "water",
+                elementType: "geometry",
+                stylers: [{ color: "#17263c" }],
+            },
+            {
+                featureType: "water",
+                elementType: "labels.text.fill",
+                stylers: [{ color: "#515c6d" }],
+            },
+            {
+                featureType: "water",
+                elementType: "labels.text.stroke",
+                stylers: [{ color: "#17263c" }],
+            },
+        ];
+
+        function initMap() {
+            // Start with a default location
+            map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 14,
+                center: { lat: 0, lng: 0 },
+                styles: darkMode
+            });
+
+            // Initialize label visibility state
+            let labelsVisible = true;
+
+            // Add label toggle functionality
+            document.getElementById('toggleLabels').addEventListener('click', function() {
+                labelsVisible = !labelsVisible;
+                this.classList.toggle('active');
+                
+                const updatedStyles = darkMode.concat([{
+                    elementType: 'labels',
+                    stylers: [{ visibility: labelsVisible ? 'on' : 'off' }]
+                }]);
+                
+                map.setOptions({ styles: updatedStyles });
+            });
+
+            // Try to get user's location
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const userLocation = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude
+                        };
+
+                        // Center map on user's location
+                        map.setCenter(userLocation);
+
+                        // Add marker for user's location
+                        new google.maps.Marker({
+                            position: userLocation,
+                            map: map,
+                            icon: {
+                                path: google.maps.SymbolPath.CIRCLE,
+                                scale: 10,
+                                fillColor: "#4285F4",
+                                fillOpacity: 1,
+                                strokeWeight: 2,
+                                strokeColor: "#FFFFFF",
+                            },
+                            title: "Your Location"
+                        });
+
+                        // Search for nearby cinemas
+                        const service = new google.maps.places.PlacesService(map);
+                        service.nearbySearch({
+                            location: userLocation,
+                            radius: 5000,  // 5km radius
+                            type: ['movie_theater'],
+                            rankBy: google.maps.places.RankBy.DISTANCE
+                        }, (results, status) => {
+                            if (status === google.maps.places.PlacesServiceStatus.OK) {
+                                // Limit to 10 results
+                                results.slice(0, 10).forEach(place => {
+                                    const marker = new google.maps.Marker({
+                                        map: map,
+                                        position: place.geometry.location,
+                                        title: place.name,
+                                        icon: {
+                                            url: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png'
+                                        }
+                                    });
+
+                                    const infowindow = new google.maps.InfoWindow({
+                                        content: `
+                                            <div class="cinema-info">
+                                                <h3>${place.name}</h3>
+                                                <p>${place.vicinity}</p>
+                                                <p>Rating: ${place.rating ? place.rating + '/5' : 'N/A'}</p>
+                                            </div>
+                                        `
+                                    });
+
+                                    marker.addListener('click', () => {
+                                        infowindow.open(map, marker);
+                                    });
+                                });
+                            }
+                        });
+                    },
+                    () => {
+                        alert("Error: The Geolocation service failed.");
+                    }
+                );
+            } else {
+                alert("Error: Your browser doesn't support geolocation.");
+            }
+        }
+    </script>
+    <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDF0Xm2YHIhDDJXXbTOxuA-1QmSzJS1-ws&libraries=places&callback=initMap">
+    </script>
+</body>
+</html>

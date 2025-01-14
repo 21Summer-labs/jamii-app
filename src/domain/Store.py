@@ -5,30 +5,19 @@ from datetime import datetime
 
 # Store Management
 
-class StoreStatus(Enum):
-    ACTIVE = "ACTIVE"
-    INACTIVE = "INACTIVE"
-    SUSPENDED = "SUSPENDED"
-
-class VerificationStatus(Enum):
-    PENDING = "PENDING"
-    VERIFIED = "VERIFIED"
-    REJECTED = "REJECTED"
+@dataclass
+class Location:
+    latitude: float
+    longitude: float
+    address: str
+    city: str
+    country: str
 
 @dataclass
 class ImageData:
     url: str
     description: Optional[str] = None
 
-@dataclass
-class BusinessHours:
-    weekly_schedule: List[str]  # Example: ["Mon-Fri: 9AM-5PM"]
-
-    def is_open(self, day: str, time: str) -> bool:
-        pass
-
-    def get_next_opening_time(self):
-        pass
 
 @dataclass
 class Store:
@@ -36,15 +25,16 @@ class Store:
     owner_id: str  # Reference to User
     store_name: str
     description: str
+    owner_message: str # link to audio file of a message from the store owner
     images: List[ImageData]
     location: Location
-    business_hours: BusinessHours
+    business_hours: str
     category: str
-    status: StoreStatus
     rating: float
-    verification_status: VerificationStatus
 
     def create(self):
+        # get metadata
+        # get location
         pass
 
     def update(self, store_name: Optional[str] = None, description: Optional[str] = None):
@@ -52,3 +42,8 @@ class Store:
             self.store_name = store_name
         if description:
             self.description = description
+
+        # if image
+        # if location
+        # if category
+

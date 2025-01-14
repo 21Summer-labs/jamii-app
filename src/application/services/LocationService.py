@@ -13,3 +13,11 @@ class LocationService:
         # Placeholder for generating directions
         return ["Head north", "Turn left", "Arrive at destination"]
 
+'''
+
+Get GPS location for a store
+Store GPS location
+Retrieve GPS location
+
+utilize gps location on google maps - ie distance from user coordinates to store coordinates
+? can this be done over an API
