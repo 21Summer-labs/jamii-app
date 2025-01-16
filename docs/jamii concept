@@ -1,0 +1,192 @@
+Concept:
+	
+	B2C market place for stores and service providers
+
+	Problem Statement:
+
+	Finding the right product or service in a new or unfamiliar location can be a frustrating and time-consuming experience for users. Traditional search methods often require extensive scrolling through listings or rely on users already knowing the name or location of stores. This process becomes even more challenging when searching for niche or specific products.
+	--
+
+	At the same time, local store owners face difficulties in showcasing their products and services to nearby customers. Existing platforms often require manual and time-intensive product uploads, making it harder for small businesses to stay competitive and reach their audience effectively.
+	--
+
+	There is a lack of a seamless, location-based solution that bridges the gap between customers looking for products and services and store owners trying to market them efficiently.
+
+	---
+
+
+	Our Jamii app helps shoppers who want to find products they want to buy by eliminating the difficulty of pinpointing local products and enabling easy discovery of exact items through location-based tagging of products and AI-assisted search using images and natural language.
+
+	Our online store helps store owners who want to go online by simplifying the process of uploading many products across different categories and increasing foot traffic to their store through AI-powered product uploads and location tagging for better visibility to nearby shoppers.
+
+	---
+
+	Shoppers:
+
+	job: looking for products they want to buy
+	pain: not easy to pinpoint local products
+	gains: they want to find the exact product easily
+
+	product: jamii app
+	pain releiver: location based tagging of products
+	gain creator: an AI assisted search using images and natural language
+
+
+	Store Owners:
+
+	job: going online
+	pain: they have many products of differing categories
+	gains: they want shoppers to come to their store
+
+	product: jamii app
+	pain reliever: AI powered product upload
+	gain creator: location tagging for store
+
+
+----
+
+User Journer Maps
+
+	Store Owner Journey
+
+    Create Store
+        Store name
+        Upload front picture
+        Enter GPS location
+        Set up business hours (to help shoppers know when the store is open)
+        Choose business category (to assist with proper tagging in search results)
+
+    Add Products
+        Take product photo (add an option to adjust or crop the photo if needed)
+        Provide audio or/and textual description
+        Auto-tagging of categories and attributes (AI-powered suggestions based on product image or description)
+        Set pricing, stock quantity, and delivery options (include options for local delivery or in-store pickup)
+        Upload and confirm product (UI for easy confirmation and editing after upload)
+
+Shopper Journey
+
+    Create Account
+        Sign up/login (option for social media sign-in for convenience)
+        Provide location (required for location-based product search)
+
+    Search for Products
+        Textual search (traditional search bar)
+        Image-based search (upload an image to find similar products)
+        Voice search (option to speak a product description or query)
+
+    View Search Results
+        Relevant products displayed based on search criteria
+        Filters for refinement (price range, product categories, ratings, proximity)
+
+    Click on Product
+        Product details (name, description, price, available quantity, store info, delivery options)
+        Reviews/ratings (if available)
+
+    Get Directions to Store
+        Map integration (Google Maps or custom API)
+        View delivery options (in-store pickup, local delivery, shipping)
+
+    Use AR to Confirm Store Location
+        AR-powered navigation (show the store's exact location when the user is nearby)
+        Option to save store for future reference (add to favorites for quick access)
+
+---
+
+Features:
+
+
+GPS
+Google maps 
+Product management system
+	Discounts and Promotions
+	Bargains
+	rating and reviews
+	filters
+Store Management system
+Multi-language support
+
+LLM annotation from images and user input
+Image and Text RAG
+Audio input service
+User management system
+	Store owner
+	Shopper
+Order management: carts 
+Chat
+Offline mode
+
+Payment for subcription option
+
+verification service - for legitimate businesses and home businesses
+
+---
+
+
+UI?UX
+	background: google maps with user location at the center
+	a google-search like - with text input area and voice/image input area
+
+	product cards and their pages
+	store cards and their pages
+	map highlighter for stores
+	cart page - and unique stuff
+	Chat section
+
+---
+
+Customer Profile
+	Store Owners
+	People selling second hand things at home (without a store)
+
+
+---
+
+Tools and Technologies
+
+	Firebase 
+	Google Cloud
+	GPS
+	React/Javascript + Python Function
+	Gemini/Claude/chatgpt
+
+---
+
+Architecture:
+	CQRS
+	DDD
+
+---
+
+Domain
+	Entities
+		User
+		Shopper
+		Store_owner
+		Store
+		Product
+
+	Value Objects
+	Aggregates
+
+
+Application
+	services
+	commands
+	queries
+	DTOs
+
+infrastructure
+	external services
+	repositories
+
+presentation
+	screens
+	components
+	actions
+	store
+	services
+
+
+----
+
+If a user doesnt find a product - its added as a request

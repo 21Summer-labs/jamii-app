@@ -1,0 +1,1 @@
+A firebase function for EMBEDDING and LLM functionalities
