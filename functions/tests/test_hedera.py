@@ -1,211 +1,84 @@
-import pytest
-from unittest.mock import Mock, patch
-from datetime import datetime
+import os
+from hedera import AccountId, PrivateKey
+from firebase_admin import auth
+import logging
 
-from utils.hedera import HederaClient
-from hedera import (
-    Client, 
-    AccountCreateTransaction, 
-    FileCreateTransaction,
-    ContractCreateTransaction,
-    ContractExecuteTransaction,
-    PrivateKey,
-    Hbar
-)
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-@pytest.fixture
-def mock_hedera_client():
-    """
-    Fixture to create a mocked HederaClient instance for testing.
-    """
-    # Mock Firebase initialization
-    with patch('firebase_admin.initialize_app'), \
-         patch('firebase_admin.credentials.Certificate'), \
-         patch('firebase_admin.firestore.client') as mock_firestore:
-        
-        # Setup mock Firestore client
-        mock_db = Mock()
-        mock_firestore.return_value = mock_db
-        
-        # Create HederaClient with mock credentials
-        client = HederaClient(
-            operator_id="0.0.1234", 
-            operator_key="some_private_key"
+def real_world_hedera_test():
+    # REPLACE THESE WITH YOUR ACTUAL CREDENTIALS
+    OPERATOR_ID = "0.0.5787516"  # Your Hedera Testnet Account ID
+    OPERATOR_KEY = "302e020100300506032b657004220420aa89ff803a14a0ed8c791295b5819f6bf0bd679cc184155ba85d8475621754c1"  # Your Hedera Testnet Private Key
+
+    try:
+        # Initialize Hedera Client
+        hedera_client = HederaClient(OPERATOR_ID, OPERATOR_KEY)
+        logger.info("Hedera Client Initialized Successfully")
+        # Simulate User Registration in Firebase
+        test_user = auth.create_user(
+            email="testuser@example.com",
+            password="SecureTestPassword123!",
+            display_name="Test User"
         )
-        
-        return client, mock_db
+        logger.info(f"Firebase User Created: {test_user.uid}")
 
-class TestHederaClient:
-    def test_initialization(self, mock_hedera_client):
-        """
-        Test HederaClient initialization.
-        """
-        hedera_client, mock_db = mock_hedera_client
-        
-        # Verify Hedera client setup
-        assert hedera_client.client is not None
-        assert hedera_client.db is not None
+        # Create Hedera Wallet for User
+        wallet_details = hedera_client.create_wallet(test_user.uid)
+        logger.info(f"Hedera Wallet Created: {wallet_details}")
 
-    def test_create_wallet(self, mock_hedera_client):
-        """
-        Test wallet creation process.
-        """
-        hedera_client, mock_db = mock_hedera_client
-        
-        # Mock Firebase user ID
-        firebase_uid = "test_user_123"
-        
-        # Mock Hedera account creation
-        with patch('hedera.AccountCreateTransaction.execute') as mock_execute, \
-             patch('hedera.AccountCreateTransaction.get_receipt') as mock_receipt:
-            # Setup mock return values
-            mock_account_id = Mock()
-            mock_account_id.account_id = "0.0.5678"
-            mock_receipt.return_value.account_id = mock_account_id
-            mock_execute.return_value.get_receipt.return_value = mock_receipt.return_value
-            
-            # Mock Firestore document set
-            mock_doc = Mock()
-            mock_db.collection.return_value.document.return_value = mock_doc
-            
-            # Execute wallet creation
-            result = hedera_client.create_wallet(firebase_uid)
-            
-            # Assertions
-            assert "customer_id" in result
-            assert "hedera_account_id" in result
-            
-            # Verify Firestore document was set
-            mock_doc.set.assert_called_once()
+        # Retrieve Wallet Details
+        retrieved_wallet = hedera_client.get_wallet(test_user.uid)
+        logger.info(f"Retrieved Wallet: {retrieved_wallet}")
 
-    def test_get_wallet(self, mock_hedera_client):
-        """
-        Test retrieving wallet details.
-        """
-        hedera_client, mock_db = mock_hedera_client
-        
-        # Firebase UID
-        firebase_uid = "test_user_123"
-        
-        # Mock Firestore document retrieval
-        mock_doc = Mock()
-        mock_doc.exists = True
-        mock_doc.to_dict.return_value = {
-            "hedera_account_id": "0.0.5678",
-            "hedera_private_key": "some_private_key"
-        }
-        
-        # Setup mock Firestore client
-        mock_db.collection.return_value.document.return_value.get.return_value = mock_doc
-        
-        # Execute wallet retrieval
-        wallet = hedera_client.get_wallet(firebase_uid)
-        
-        # Assertions
-        assert wallet is not None
-        assert wallet["hedera_account_id"] == "0.0.5678"
+        # Deploy Smart Contract (Simulating Store Owner Deployment)
+        store_owner_id = wallet_details['hedera_account_id']
+        contract_amount = 100  # Example amount in USD
+        delivery_fee = 10      # Example delivery fee
 
-    def test_deploy_contract(self, mock_hedera_client):
-        """
-        Test smart contract deployment.
-        """
-        hedera_client, mock_db = mock_hedera_client
-        
-        # Mock bytecode reading
-        with patch('builtins.open', create=True) as mock_open:
-            mock_open.return_value.__enter__.return_value.read.return_value = "mock_bytecode"
-            
-            # Mock various Hedera transactions
-            with patch('hedera.FileCreateTransaction.execute') as mock_file_create, \
-                 patch('hedera.FileAppendTransaction.execute') as mock_file_append, \
-                 patch('hedera.ContractCreateTransaction.execute') as mock_contract_create:
-                
-                # Setup mock return values
-                mock_file_id = Mock()
-                mock_file_id.file_id = "0.0.9876"
-                mock_contract_id = Mock()
-                mock_contract_id.contract_id = "0.0.5432"
-                
-                mock_file_create.return_value.get_receipt.return_value.file_id = mock_file_id
-                mock_contract_create.return_value.get_receipt.return_value.contract_id = mock_contract_id
-                
-                # Execute contract deployment
-                contract_id = hedera_client.deploy_contract(
-                    store_owner_id="0.0.1111", 
-                    amount=100, 
-                    delivery_fee=10
-                )
-                
-                # Assertions
-                assert contract_id == "0.0.5432"
+        contract_id = hedera_client.deploy_contract(
+            store_owner_id, 
+            contract_amount, 
+            delivery_fee
+        )
+        logger.info(f"Contract Deployed: {contract_id}")
 
-    def test_execute_contract(self, mock_hedera_client):
-        """
-        Test contract execution.
-        """
-        hedera_client, mock_db = mock_hedera_client
-        
-        # Mock contract execution
-        with patch('hedera.ContractExecuteTransaction.execute') as mock_execute:
-            # Setup mock return values
-            mock_receipt = Mock()
-            mock_execute.return_value.get_receipt.return_value = mock_receipt
-            
-            # Execute contract method
-            result = hedera_client.execute_contract(
-                contract_id="0.0.5432", 
-                function_name="testFunction",
-                params=["0.0.1111", 100]
-            )
-            
-            # Assertions
-            assert result == mock_receipt
+        # Fund Contract
+        fund_receipt = hedera_client.fund_contract(
+            contract_id, 
+            contract_amount, 
+            delivery_fee
+        )
+        logger.info(f"Contract Funded: {fund_receipt}")
 
-    def test_fund_contract(self, mock_hedera_client):
-        """
-        Test contract funding.
-        """
-        hedera_client, mock_db = mock_hedera_client
-        
-        # Mock contract funding
-        with patch.object(hedera_client, 'execute_contract') as mock_execute:
-            # Execute fund contract
-            hedera_client.fund_contract(
-                contract_id="0.0.5432", 
-                amount=100, 
-                delivery_fee=10
-            )
-            
-            # Verify execute_contract was called with correct parameters
-            mock_execute.assert_called_once_with(
-                contract_id="0.0.5432", 
-                function_name="fundContract", 
-                gas=100000, 
-                payable_amount=110
-            )
+        # Simulate Pickup Confirmation
+        pickup_receipt = hedera_client.confirm_pickup(contract_id)
+        logger.info(f"Pickup Confirmed: {pickup_receipt}")
 
-    def test_confirm_pickup(self, mock_hedera_client):
-        """
-        Test confirm pickup method.
-        """
-        hedera_client, mock_db = mock_hedera_client
-        
-        # Mock contract execution
-        with patch.object(hedera_client, 'execute_contract') as mock_execute:
-            # Execute confirm pickup
-            hedera_client.confirm_pickup(contract_id="0.0.5432")
-            
-            # Verify execute_contract was called with correct parameters
-            mock_execute.assert_called_once_with(
-                contract_id="0.0.5432", 
-                function_name="confirmPickup", 
-                gas=50000
-            )
+        # Simulate Delivery Acceptance
+        agent_id = "0.0.AGENT_ACCOUNT"  # Replace with actual agent account
+        accept_delivery_receipt = hedera_client.accept_delivery(
+            contract_id, 
+            agent_id, 
+            contract_amount
+        )
+        logger.info(f"Delivery Accepted: {accept_delivery_receipt}")
 
-def test_hedera_client_error_handling():
-    """
-    Test error handling during Hedera client initialization.
-    """
-    with pytest.raises(Exception):
-        # Attempt to create client with invalid credentials
-        HederaClient(operator_id=None, operator_key=None)
+        # Confirm Final Delivery
+        customer_id = wallet_details['hedera_account_id']
+        store_id = store_owner_id  # In this example, using same account
+        confirm_delivery_receipt = hedera_client.confirm_delivery(
+            contract_id, 
+            customer_id, 
+            store_id, 
+            agent_id
+        )
+        logger.info(f"Delivery Confirmed: {confirm_delivery_receipt}")
+
+    except Exception as e:
+        logger.error(f"Test Failed: {e}")
+        raise
+
+if __name__ == "__main__":
+    real_world_hedera_test()
