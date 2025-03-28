@@ -2,7 +2,9 @@ import uuid
 from datetime import datetime
 from dataclasses import asdict, dataclass, field
 from typing import List, Dict, Optional
-from repositories import FirestoreRepository
+from typing import Optional
+
+from utils.repositories import FirestoreRepository
 
 @dataclass
 class Product:
@@ -53,3 +55,35 @@ class Store:
         # Write the data to Firestore
         repo.write(collection="stores", data=data)
 
+
+@dataclass
+class User:
+    user_id: str
+    name: str
+    email: str
+    wallet_address: str
+
+
+@dataclass
+class Order:
+    order_id: str
+    user_id: str
+    store_id: str
+    total_price: float
+    delivery_fee: float
+    status: str
+    timestamp: datetime
+    contract_id: Optional[str] = None  # New field to store Hedera contract ID
+    delivery_agent_id: Optional[str] = None  # Optional field for delivery agent
+    
+    def create(self, repo: FirestoreRepository):
+        """
+        Create the order in Firestore repository.
+        
+        :param repo: Firestore repository to persist the order
+        """
+        data = {
+            "document_tag": self.order_id,
+            "contents": self.__dict__,  # Convert the entire dataclass to a dictionary
+        }
+        repo.write(collection="orders", data=data)
