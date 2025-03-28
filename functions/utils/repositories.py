@@ -53,6 +53,21 @@ class FirestoreRepository:
             docs = collection_ref.stream()
             
         return [doc.to_dict() for doc in docs]
+
+    def update(self, collection: str, identifier: str, updates: Dict) -> None:
+        """
+        Update an existing Firestore document.
+
+        :param collection: The Firestore collection name.
+        :param identifier: Document identifier to update.
+        :param updates: Dictionary of updates to apply.
+        :raises ValueError: If the document does not exist.
+        """
+        doc_ref = self.db.collection(collection).document(identifier)
+        if not doc_ref.get().exists:
+            raise ValueError(f"Document '{identifier}' does not exist")
+        doc_ref.update(updates)
+        return True
         
 
 
