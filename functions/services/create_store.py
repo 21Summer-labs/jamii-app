@@ -1,4 +1,6 @@
+import uuid
 from utils.repositories import FirestoreRepository
+from models import Store  # Assuming Store is defined here
 
 class CreateStore:
     def __init__(self, repo: FirestoreRepository):

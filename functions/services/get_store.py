@@ -1,4 +1,7 @@
+from typing import List, Optional
 from utils.repositories import FirestoreRepository
+from models import Store, Location  # Assuming Store and Location are defined here
+
 
 class GetStore:
     def __init__(self, repo: FirestoreRepository):

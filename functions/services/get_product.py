@@ -1,4 +1,6 @@
+from typing import Optional
 from utils.repositories import FirestoreRepository
+from models import Product  # Assuming Product is defined here
 
 class GetProduct:
     def __init__(self, product_repo: FirestoreRepository):

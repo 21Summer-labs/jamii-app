@@ -2,6 +2,10 @@ from typing import List, Optional, Dict, TypedDict
 import uuid
 import json
 from utils.repositories import FirestoreRepository
+from utils.models import Product  # Ensure Product is correctly imported
+from utils.services import GeminiHandler, EmbeddingService, FirebaseStorageRepository  # Ensure correct paths
+
+import logging
 
 class ProductCreationService:
     def __init__(
@@ -25,8 +29,8 @@ class ProductCreationService:
         temp_audio_path: str,
         temp_image_paths: List[str],
         metadata: Dict
-        ) -> Dict:
-        """Extract product attributes using Gemini."""
+    ) -> Dict:
+        """Extract product attributes using Gemini AI."""
         try:
             class ProductAttributes(TypedDict):
                 name: str
@@ -47,6 +51,7 @@ class ProductCreationService:
             Additional context: {metadata.get('additional_info', '')}
             Please provide the attributes in a structured format.
             """
+
             raw_attributes = self.assistant_service.process_content(
                 schema=ProductAttributes,
                 text=prompt,
@@ -54,19 +59,19 @@ class ProductCreationService:
                 audio_path=temp_audio_path,
                 use_json=True
             )
-            
-            # Add debug to confirm the output type
-            print(f"Debug - raw attributes output: {raw_attributes}")
-            
-            # Parse JSON if needed
+
+            # Log the raw response for debugging
+            logging.info(f"Extracted attributes: {raw_attributes}")
+
             if isinstance(raw_attributes, str):
                 raw_attributes = json.loads(raw_attributes)
-            
+
             if not isinstance(raw_attributes, dict):
                 raise TypeError(f"Expected a dictionary for attributes but got {type(raw_attributes)}")
-            
+
             return raw_attributes
         except Exception as e:
+            logging.error(f"Failed to extract product attributes: {e}")
             raise Exception(f"Failed to extract product attributes: {str(e)}")
 
     def create_product(
@@ -79,17 +84,17 @@ class ProductCreationService:
         Create a product using the provided images, audio description, and metadata.
         """
         try:
-            # Generate product ID first
+            if 'store_id' not in metadata:
+                raise ValueError("Missing 'store_id' in metadata")
+
             product_id = self._generate_product_id()
-            
-            # Extract product attributes using temporary files
+
             attributes = self._extract_product_attributes(
                 temp_audio_path,
                 temp_image_paths,
                 metadata
             )
-            
-            # Store files and get URLs
+
             try:
                 image_urls, audio_url = self.storage_repo.store_product_files(
                     store_id=metadata['store_id'],
@@ -98,25 +103,16 @@ class ProductCreationService:
                     audio_path=temp_audio_path
                 )
             except Exception as e:
+                logging.error(f"Failed to store product files: {e}")
                 raise Exception(f"Failed to store product files: {str(e)}")
-            
-            # Create embedding for search - Fixed this section
+
             try:
-                # Add debug logging to see what we're getting
-                print(f"Debug - attributes received: {attributes}")
-                
-                # Make sure attributes are properly accessed as a dictionary
-                if isinstance(attributes, dict):
-                    search_text = f"{attributes.get('name', '')} {attributes.get('description', '')} {' '.join(attributes.get('tags', []))}"
-                else:
-                    # If attributes is not a dictionary, convert it to string representation
-                    search_text = str(attributes)
-                
+                search_text = f"{attributes.get('name', '')} {attributes.get('description', '')} {' '.join(attributes.get('tags', []))}"
                 self.embedding_service.index_text(search_text, product_id)
             except Exception as e:
-                raise Exception(f"Failed to create search embedding: {str(e)} - Attributes type: {type(attributes)}")
-            
-            # Create product instance with storage URLs
+                logging.error(f"Failed to create search embedding: {e}")
+                raise Exception(f"Failed to create search embedding: {str(e)}")
+
             product = Product(
                 product_id=product_id,
                 store_id=metadata['store_id'],
@@ -130,14 +126,15 @@ class ProductCreationService:
                 stock=metadata.get('stock', 0),
                 tags=attributes.get('tags', [])
             )
-            
-            # Save to repository
+
             try:
                 product.create(self.product_repo)
             except Exception as e:
+                logging.error(f"Failed to save product to database: {e}")
                 raise Exception(f"Failed to save product to database: {str(e)}")
-            
+
             return product
 
         except Exception as e:
+            logging.error(f"Product creation failed: {e}")
             raise Exception(f"Product creation failed: {str(e)}")

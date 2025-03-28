@@ -1,7 +1,7 @@
-from typing import List, Optional, Dict, TypedDict
-import uuid
-import json
+from typing import List, Optional
 from utils.repositories import FirestoreRepository
+from models import Product  # Assuming Product is defined here
+
 
 class GetProducts:
     def __init__(self, product_repo: FirestoreRepository):

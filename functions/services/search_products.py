@@ -1,7 +1,11 @@
-from typing import List, Optional, Dict, TypedDict
+
 import uuid
 import json
+from typing import List, Optional, Dict, TypedDict
 from utils.repositories import FirestoreRepository
+from utils.models import Product  # Ensure this module contains the Product class
+from services.gemini import GeminiHandler  # Assuming this is where GeminiHandler is defined
+from services.pinecone import EmbeddingService
 
 class SearchFilters(TypedDict):
     description: Optional[str]
